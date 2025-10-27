@@ -43,6 +43,7 @@ def user_logout(request):
     return redirect('login')
 
 
+@login_required
 def home(request):
     # Получаем все объекты Post из базы данных
     posts = Post.objects.all()
