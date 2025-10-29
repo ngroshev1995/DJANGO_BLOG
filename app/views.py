@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm, UserLoginForm
-from .models import Post
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .forms import UserRegisterForm, UserLoginForm, PostForm
+from .models import Post, Likes
 
 
 # Create your views here.
@@ -50,13 +52,53 @@ def home(request):
 
     # Передаем список posts в шаблон home.html через контекст
     context = {
-        'posts': posts, # 'posts' - это имя переменной, которое будет доступно в шаблоне
+        'posts': posts,  # 'posts' - это имя переменной, которое будет доступно в шаблоне
     }
     return render(request, 'app/home.html', context)
 
+
 @login_required
 def post_detail(request, post_id):
-    # Получаем конкретный пост по ID или возвращаем 404, если не найден
+    # Получаем конкретный пост по ID или возвращаем 404, если пост не найден.
     post = get_object_or_404(Post, id=post_id)
+
+    user_liked = False
+    if request.user.is_authenticated:
+        user_liked = post.likes.filter(user=request.user).exists()
     # Можно передать дополнительные данные, например, комментарии
-    return render(request, 'app/post_detail.html', {'post': post})
+    return render(request, 'app/post_detail.html', {
+        'post': post,
+        'users_liked': user_liked,
+    })
+
+
+@login_required
+def post_create(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            messages.success(request, "Пост успешно создан!")
+            return redirect('home')
+    else:
+        form = PostForm()
+    return render(request, 'app/post_create.html', {'form': form})
+
+
+@login_required
+def post_delete(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if post.author != request.user:
+        messages.error(request, "Ты чё, пёс?! 🐶 Ты не можешь удалить пост другого толстого делового кота!")
+        return redirect('home')
+
+    if request.method == "POST":
+        post_title = post.title
+        post.delete()
+        messages.success(request, f"Пост {post_title} успешно удалён!")
+        return redirect('home')
+
+    messages.warning(request, "Ты чё, пёс?! 🐶 Для удаления используй кнопку удаления поста!")
+    return redirect('post_detail', post_id=post.id)

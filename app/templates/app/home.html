@@ -7,21 +7,16 @@
     <aside id="sidebar" class="bg-dark text-white flex-shrink-0">
         <div class="sidebar-content p-3">
             <div class="sidebar-header mb-3">
-                <h5 class="text-white">Меню Блога</h5>
+                <h5 class="text-white">Меню котоблога</h5>
             </div>
             <ul class="nav flex-column">
-                <!-- Пример элементов навигации -->
-                <!--
+                {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link text-light" href="#"><i class="fas fa-home"></i> Домой</a>
+                    <a class="nav-link text-light" href="{% url 'post_create' %}">
+                        Добавить пост
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-light" href="#">Мои посты</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-light" href="#">Категории</a>
-                </li>
-                -->
+                {% endif %}
             </ul>
         </div>
     </aside>
@@ -30,7 +25,7 @@
     <div class="flex-grow-1 bg-light" style="margin-left: 10px; padding-right: 20px;">
         <!-- Добавлен небольшой отступ от боковой панели -->
         <div class="container-fluid mt-4 px-3">
-            <h1 class="mb-3">Добрый блог</h1>
+            <h1 class="mb-3">Блог толстого делового кота</h1>
             <h2 class="mb-4">Последние посты:</h2>
 
             {% if posts %}
