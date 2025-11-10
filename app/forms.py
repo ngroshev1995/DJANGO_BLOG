@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Post
+from .models import Post, Comment
 
 
 class UserRegisterForm(UserCreationForm):
@@ -32,4 +32,16 @@ class PostForm(forms.ModelForm):
             'title': 'Заголовок',
             'content': 'Содежание',
             'image': 'Изображение (опционально)'
+        }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control', 'row': 3, 'placeholder': 'Котик, скажи своё мяу...'})
+        }
+        labels = {
+            'content': '',
         }
