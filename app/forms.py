@@ -20,14 +20,16 @@ class UserLoginForm(forms.Form):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'image']
 
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'content': forms.Textarea(attrs={'class': 'form-control', 'row': 5})
+            'content': forms.Textarea(attrs={'class': 'form-control', 'row': 5}),
+            'image': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
         labels = {
-            'title': "Заголовок",
-            'content': "Содежание",
+            'title': 'Заголовок',
+            'content': 'Содежание',
+            'image': 'Изображение (опционально)'
         }

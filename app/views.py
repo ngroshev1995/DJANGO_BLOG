@@ -64,18 +64,19 @@ def post_detail(request, post_id):
 
     user_liked = False
     if request.user.is_authenticated:
-        user_liked = post.likes.filter(user=request.user).exists()
+        post.user_liked = post.likes.filter(user=request.user).exists()
+    else:
+        post.user_liked = False
     # Можно передать дополнительные данные, например, комментарии
     return render(request, 'app/post_detail.html', {
         'post': post,
-        'users_liked': user_liked,
     })
 
 
 @login_required
 def post_create(request):
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
@@ -102,3 +103,38 @@ def post_delete(request, post_id):
 
     messages.warning(request, "Ты чё, пёс?! 🐶 Для удаления используй кнопку удаления поста!")
     return redirect('post_detail', post_id=post.id)
+
+
+@login_required
+def toggle_like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    like_obj, created = Likes.objects.get_or_create(user=request.user, post=post)
+
+    if created:
+        action = 'liked'
+    else:
+        like_obj.delete()
+        action = 'unliked'
+        messages.info(request, f"Вы {action} пост {post.title}.")
+
+    next_url = request.META.get('HTTP_REFERER', reverse('home'))
+    return HttpResponseRedirect(next_url)
+
+
+@login_required
+def post_edit(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.author != request.user:
+        messages.error("Ты чё, псина дрожащая. Редактировать сей кошачий опус ты права не имеешь!")
+        return redirect('home')
+
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Пост успешно обновлён.")
+            return redirect("post_detail", post_id=post.id)
+    else:
+        form = PostForm(instance=post)
+    return  render(request, 'app/post_edit.html', {'form': form, 'post': post})

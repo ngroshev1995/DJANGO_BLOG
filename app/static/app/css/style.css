@@ -173,3 +173,6 @@ h2 {
     opacity: 1;
 }
 
+.img-fluid {
+    max-width: 400px;
+}
