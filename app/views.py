@@ -290,8 +290,8 @@ def toggle_favorite(request, post_id):
 
 @login_required
 def messages_list(request):
-    received_messages = Message.objects.filter(recipient=request.user).select_related('sender_profile').order_by('-timestamp')
-    unread_count = receives_messages.filter(is_read=False).count()
+    received_messages = Message.objects.filter(recipient=request.user).select_related('sender').order_by('-timestamp')
+    unread_count = received_messages.filter(is_read=False).count()
     return render(request, 'app/messages_list.html', {
         'messages': received_messages,
         'unread_count': unread_count,
